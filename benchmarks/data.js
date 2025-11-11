@@ -1,39 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1762706960584,
+  "lastUpdate": 1762896649885,
   "repoUrl": "https://github.com/czlonkowski/n8n-mcp",
   "entries": {
     "n8n-mcp Benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "56956555+czlonkowski@users.noreply.github.com",
-            "name": "Romuald Członkowski",
-            "username": "czlonkowski"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "c52bbcbb830f43355fe8186564e46dceebd82ad3",
-          "message": "Merge pull request #298 from czlonkowski/fix/issue-296-nodejs-adapter-bypass\n\nfix: resolve sql.js adapter bypass in NodeRepository constructor (Issue #296)",
-          "timestamp": "2025-10-09T23:10:37+02:00",
-          "tree_id": "0233b737e3aa00e5d3f6ee496c7dc0c0c758eaf8",
-          "url": "https://github.com/czlonkowski/n8n-mcp/commit/c52bbcbb830f43355fe8186564e46dceebd82ad3"
-        },
-        "date": 1760044360500,
-        "tool": "customSmallerIsBetter",
-        "benches": [
-          {
-            "name": "sample - array sorting - small",
-            "value": 0.0136,
-            "range": "0.3096",
-            "unit": "ms",
-            "extra": "73341 ops/sec"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -1542,6 +1511,37 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/czlonkowski/n8n-mcp/commit/14f3b9c12a7ecd1ff0f87e4e2de47b9c27b39cb7"
         },
         "date": 1762706960174,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "sample - array sorting - small",
+            "value": 0.0136,
+            "range": "0.3096",
+            "unit": "ms",
+            "extra": "73341 ops/sec"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56956555+czlonkowski@users.noreply.github.com",
+            "name": "Romuald Członkowski",
+            "username": "czlonkowski"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77151e013ee3fea15be34f009594bcde81edf8e2",
+          "message": "chore: update n8n to 1.119.1 (#414)",
+          "timestamp": "2025-11-11T22:28:50+01:00",
+          "tree_id": "cf928a8c8dd26cdf025396d3481748294ba10ecf",
+          "url": "https://github.com/czlonkowski/n8n-mcp/commit/77151e013ee3fea15be34f009594bcde81edf8e2"
+        },
+        "date": 1762896649631,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
