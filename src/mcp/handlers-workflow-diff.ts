@@ -301,12 +301,7 @@ export async function handleUpdatePartialWorkflow(
           mutationSuccess: true,
           durationMs: Date.now() - startTime,
         }).catch(err => {
-          logger.warn('Failed to track mutation telemetry:', err);
-          logger.debug('Mutation data that failed:', {
-            sessionId,
-            intent: input.intent,
-            operationCount: input.operations.length
-          });
+          logger.debug('Failed to track mutation telemetry:', err);
         });
       }
 
@@ -378,7 +373,6 @@ async function trackWorkflowMutation(data: any): Promise<void> {
     const { telemetry } = await import('../telemetry/telemetry-manager.js');
     await telemetry.trackWorkflowMutation(data);
   } catch (error) {
-    // Silently fail - telemetry should never break core functionality
     logger.debug('Telemetry tracking failed:', error);
   }
 }

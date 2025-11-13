@@ -8,6 +8,27 @@ import { TelemetryEvent, WorkflowTelemetry, WorkflowMutationRecord, TELEMETRY_CO
 import { TelemetryError, TelemetryErrorType, TelemetryCircuitBreaker } from './telemetry-error';
 import { logger } from '../utils/logger';
 
+/**
+ * Convert camelCase object keys to snake_case
+ * Needed because Supabase PostgREST doesn't auto-convert
+ */
+function toSnakeCase(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(toSnakeCase);
+  if (typeof obj !== 'object') return obj;
+
+  const result: any = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // Convert camelCase to snake_case
+      const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+      // Recursively convert nested objects
+      result[snakeKey] = toSnakeCase(obj[key]);
+    }
+  }
+  return result;
+}
+
 export class TelemetryBatchProcessor {
   private flushTimer?: NodeJS.Timeout;
   private isFlushingEvents: boolean = false;
@@ -244,11 +265,22 @@ export class TelemetryBatchProcessor {
 
       for (const batch of batches) {
         const result = await this.executeWithRetry(async () => {
+          // Convert camelCase to snake_case for Supabase
+          const snakeCaseBatch = batch.map(mutation => toSnakeCase(mutation));
+
           const { error } = await this.supabase!
             .from('workflow_mutations')
-            .insert(batch);
+            .insert(snakeCaseBatch);
 
           if (error) {
+            // Enhanced error logging for mutation flushes
+            logger.error('Mutation insert error details:', {
+              code: (error as any).code,
+              message: (error as any).message,
+              details: (error as any).details,
+              hint: (error as any).hint,
+              fullError: String(error)
+            });
             throw error;
           }
 
@@ -269,7 +301,10 @@ export class TelemetryBatchProcessor {
 
       return true;
     } catch (error) {
-      logger.debug('Failed to flush mutations:', error);
+      logger.error('Failed to flush mutations with details:', {
+        errorMsg: error instanceof Error ? error.message : String(error),
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      });
       throw new TelemetryError(
         TelemetryErrorType.NETWORK_ERROR,
         'Failed to flush workflow mutations',
