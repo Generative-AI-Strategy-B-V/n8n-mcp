@@ -1,39 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1764601040795,
+  "lastUpdate": 1764611765468,
   "repoUrl": "https://github.com/czlonkowski/n8n-mcp",
   "entries": {
     "n8n-mcp Benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "124107433+wiktorzawa@users.noreply.github.com",
-            "name": "wiktorzawa",
-            "username": "wiktorzawa"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "ef1cf747a36c89ee21594119196f4e3594111e86",
-          "message": "fix: add structuredContent to HTTP wrapper for validation tools (#343)\n\nMerging PR #343 - fixes MCP protocol error -32600 for validation tools via HTTP transport.\n\nThe integration test failures are due to MSW/CI infrastructure issues with external contributor PRs (mock server not responding), NOT the code changes. The fix has been manually tested and verified working with n8n-nodes-mcp community node.\n\nTests pass locally and the code is correct.",
-          "timestamp": "2025-10-21T20:02:13+02:00",
-          "tree_id": "c23f3f1d532747bc85ca4d5e9b6f2ff094e13daf",
-          "url": "https://github.com/czlonkowski/n8n-mcp/commit/ef1cf747a36c89ee21594119196f4e3594111e86"
-        },
-        "date": 1761069838338,
-        "tool": "customSmallerIsBetter",
-        "benches": [
-          {
-            "name": "sample - array sorting - small",
-            "value": 0.0136,
-            "range": "0.3096",
-            "unit": "ms",
-            "extra": "73341 ops/sec"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -1542,6 +1511,37 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/czlonkowski/n8n-mcp/commit/33690c5650e680b2c9cfbae75cac81a761742389"
         },
         "date": 1764601040167,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "sample - array sorting - small",
+            "value": 0.0136,
+            "range": "0.3096",
+            "unit": "ms",
+            "extra": "73341 ops/sec"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "56956555+czlonkowski@users.noreply.github.com",
+            "name": "Romuald Członkowski",
+            "username": "czlonkowski"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3188d209b78ad8267fb0afb70bf3050174116230",
+          "message": "fix: AI connection type propagation and get_node improvements (v2.28.1) (#461)\n\n* fix: AI connection type propagation and get_node improvements (v2.28.1)\n\nBug fixes:\n- Issue #458: addConnection now preserves AI connection types (ai_tool, ai_memory, ai_languageModel) instead of defaulting to 'main'\n- Fixed false positive \"AI Agent has no tools connected\" validation warning\n\nEnhancements:\n- Added expectedFormat field to resourceLocator properties in get_node output\n- Added versionNotice field to make typeVersion more prominent\n\nConceived by Romuald Członkowski - https://www.aiadvisors.pl/en\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\n\n* test: add missing test coverage for PR #461 improvements\n\n- Added test for AI Agent validation positive case (tools properly connected)\n- Added 3 tests for expectedFormat on resourceLocator properties\n\nConceived by Romuald Członkowski - https://www.aiadvisors.pl/en\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-12-01T18:54:15+01:00",
+          "tree_id": "22bdf426543cce8d7ff7a2cacc9e70eb68994bed",
+          "url": "https://github.com/czlonkowski/n8n-mcp/commit/3188d209b78ad8267fb0afb70bf3050174116230"
+        },
+        "date": 1764611764753,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
