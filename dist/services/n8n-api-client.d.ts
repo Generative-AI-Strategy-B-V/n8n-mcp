@@ -1,4 +1,4 @@
-import { Workflow, WorkflowListParams, WorkflowListResponse, Execution, ExecutionListParams, ExecutionListResponse, Credential, CredentialListParams, CredentialListResponse, Tag, TagListParams, TagListResponse, HealthCheckResponse, N8nVersionInfo, Variable, WebhookRequest, SourceControlStatus, SourceControlPullResult, SourceControlPushResult } from '../types/n8n-api';
+import { Workflow, WorkflowListParams, WorkflowListResponse, Execution, ExecutionListParams, ExecutionListResponse, Credential, CredentialListParams, CredentialListResponse, CredentialSchema, Tag, TagListParams, TagListResponse, HealthCheckResponse, N8nVersionInfo, Variable, WebhookRequest, SourceControlStatus, SourceControlPullResult, SourceControlPushResult, User, UserListParams, UserListResponse, CreateUserRequest, Project, ProjectListParams, ProjectListResponse, ProjectUserRelation, AuditOptions, AuditReport } from '../types/n8n-api';
 export interface N8nApiClientConfig {
     baseUrl: string;
     apiKey: string;
@@ -43,6 +43,23 @@ export declare class N8nApiClient {
     createVariable(variable: Partial<Variable>): Promise<Variable>;
     updateVariable(id: string, variable: Partial<Variable>): Promise<Variable>;
     deleteVariable(id: string): Promise<void>;
+    listUsers(params?: UserListParams): Promise<UserListResponse>;
+    createUser(users: CreateUserRequest[]): Promise<User[]>;
+    getUser(idOrEmail: string, includeRole?: boolean): Promise<User>;
+    deleteUser(idOrEmail: string): Promise<void>;
+    changeUserRole(id: string, newRoleName: string): Promise<void>;
+    listProjects(params?: ProjectListParams): Promise<ProjectListResponse>;
+    createProject(name: string): Promise<Project>;
+    updateProject(id: string, name: string): Promise<void>;
+    deleteProject(id: string): Promise<void>;
+    addProjectUsers(projectId: string, relations: ProjectUserRelation[]): Promise<void>;
+    removeProjectUser(projectId: string, userId: string): Promise<void>;
+    changeProjectUserRole(projectId: string, userId: string, role: string): Promise<void>;
+    getCredentialSchema(credentialTypeName: string): Promise<CredentialSchema>;
+    transferCredential(id: string, destinationProjectId: string): Promise<void>;
+    generateAudit(options?: AuditOptions): Promise<AuditReport>;
+    retryExecution(id: string): Promise<Execution>;
+    getTag(id: string): Promise<Tag>;
     private validateListResponse;
 }
 //# sourceMappingURL=n8n-api-client.d.ts.map

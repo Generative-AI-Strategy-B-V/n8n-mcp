@@ -116,6 +116,80 @@ export interface Variable {
     key: string;
     value: string;
     type?: 'string';
+    projectId?: string;
+}
+export interface User {
+    id?: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    isPending?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    role?: string;
+    globalRole?: {
+        id: number;
+        name: string;
+        scope: string;
+    };
+    inviteAcceptUrl?: string;
+    emailSent?: boolean;
+}
+export interface UserListParams {
+    limit?: number;
+    cursor?: string;
+    includeRole?: boolean;
+    projectId?: string;
+}
+export interface UserListResponse {
+    data: User[];
+    nextCursor?: string | null;
+}
+export interface CreateUserRequest {
+    email: string;
+    role?: string;
+}
+export interface Project {
+    id?: string;
+    name: string;
+    type?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+export interface ProjectListParams {
+    limit?: number;
+    cursor?: string;
+}
+export interface ProjectListResponse {
+    data: Project[];
+    nextCursor?: string | null;
+}
+export interface ProjectUserRelation {
+    userId: string;
+    role: string;
+}
+export interface AuditOptions {
+    daysAbandonedWorkflow?: number;
+    categories?: Array<'credentials' | 'database' | 'nodes' | 'filesystem' | 'instance'>;
+}
+export interface AuditReport {
+    [category: string]: {
+        risk: 'low' | 'medium' | 'high';
+        issues: Array<{
+            message: string;
+            severity: string;
+            details?: Record<string, unknown>;
+        }>;
+    };
+}
+export interface CredentialSchema {
+    type: string;
+    properties: Record<string, {
+        type: string;
+        description?: string;
+        default?: unknown;
+    }>;
+    required?: string[];
 }
 export interface WorkflowExport {
     id: string;

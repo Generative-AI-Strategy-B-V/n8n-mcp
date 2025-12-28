@@ -56,6 +56,16 @@ exports.handleDiagnostic = handleDiagnostic;
 exports.handleWorkflowVersions = handleWorkflowVersions;
 exports.handleDeployTemplate = handleDeployTemplate;
 exports.handleTriggerWebhookWorkflow = handleTriggerWebhookWorkflow;
+exports.handleCredentials = handleCredentials;
+exports.handleTags = handleTags;
+exports.handleVariables = handleVariables;
+exports.handleUsers = handleUsers;
+exports.handleProjects = handleProjects;
+exports.handleActivateWorkflow = handleActivateWorkflow;
+exports.handleDeactivateWorkflow = handleDeactivateWorkflow;
+exports.handleSourceControl = handleSourceControl;
+exports.handleAudit = handleAudit;
+exports.handleRetryExecution = handleRetryExecution;
 const n8n_api_client_1 = require("../services/n8n-api-client");
 const n8n_api_1 = require("../config/n8n-api");
 const n8n_api_2 = require("../types/n8n-api");
@@ -2021,6 +2031,532 @@ async function handleTriggerWebhookWorkflow(args, context) {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error occurred'
         };
+    }
+}
+async function handleCredentials(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['list', 'get', 'create', 'delete', 'schema', 'transfer']),
+            id: zod_1.z.string().optional(),
+            name: zod_1.z.string().optional(),
+            type: zod_1.z.string().optional(),
+            data: zod_1.z.record(zod_1.z.unknown()).optional(),
+            destinationProjectId: zod_1.z.string().optional(),
+            limit: zod_1.z.number().optional(),
+            cursor: zod_1.z.string().optional(),
+        }).parse(args);
+        switch (input.action) {
+            case 'list': {
+                const result = await client.listCredentials({
+                    limit: input.limit,
+                    cursor: input.cursor,
+                });
+                return {
+                    success: true,
+                    data: result,
+                    message: `Retrieved ${result.data.length} credentials`
+                };
+            }
+            case 'get': {
+                if (!input.id) {
+                    return { success: false, error: 'Credential ID is required for get action' };
+                }
+                const credential = await client.getCredential(input.id);
+                return { success: true, data: credential };
+            }
+            case 'create': {
+                if (!input.name || !input.type) {
+                    return { success: false, error: 'Name and type are required for create action' };
+                }
+                const credential = await client.createCredential({
+                    name: input.name,
+                    type: input.type,
+                    data: input.data,
+                });
+                return {
+                    success: true,
+                    data: credential,
+                    message: `Credential "${input.name}" created successfully`
+                };
+            }
+            case 'delete': {
+                if (!input.id) {
+                    return { success: false, error: 'Credential ID is required for delete action' };
+                }
+                await client.deleteCredential(input.id);
+                return { success: true, message: `Credential ${input.id} deleted successfully` };
+            }
+            case 'schema': {
+                if (!input.type) {
+                    return { success: false, error: 'Credential type is required for schema action' };
+                }
+                const schema = await client.getCredentialSchema(input.type);
+                return { success: true, data: schema };
+            }
+            case 'transfer': {
+                if (!input.id || !input.destinationProjectId) {
+                    return { success: false, error: 'Credential ID and destination project ID are required for transfer action' };
+                }
+                await client.transferCredential(input.id, input.destinationProjectId);
+                return { success: true, message: `Credential ${input.id} transferred successfully` };
+            }
+            default:
+                return { success: false, error: `Unknown action: ${input.action}` };
+        }
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleTags(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['list', 'get', 'create', 'update', 'delete']),
+            id: zod_1.z.string().optional(),
+            name: zod_1.z.string().optional(),
+            limit: zod_1.z.number().optional(),
+            cursor: zod_1.z.string().optional(),
+        }).parse(args);
+        switch (input.action) {
+            case 'list': {
+                const result = await client.listTags({
+                    limit: input.limit,
+                    cursor: input.cursor,
+                });
+                return {
+                    success: true,
+                    data: result,
+                    message: `Retrieved ${result.data.length} tags`
+                };
+            }
+            case 'get': {
+                if (!input.id) {
+                    return { success: false, error: 'Tag ID is required for get action' };
+                }
+                const tag = await client.getTag(input.id);
+                return { success: true, data: tag };
+            }
+            case 'create': {
+                if (!input.name) {
+                    return { success: false, error: 'Name is required for create action' };
+                }
+                const tag = await client.createTag({ name: input.name });
+                return {
+                    success: true,
+                    data: tag,
+                    message: `Tag "${input.name}" created successfully`
+                };
+            }
+            case 'update': {
+                if (!input.id || !input.name) {
+                    return { success: false, error: 'Tag ID and name are required for update action' };
+                }
+                const tag = await client.updateTag(input.id, { name: input.name });
+                return {
+                    success: true,
+                    data: tag,
+                    message: `Tag ${input.id} updated successfully`
+                };
+            }
+            case 'delete': {
+                if (!input.id) {
+                    return { success: false, error: 'Tag ID is required for delete action' };
+                }
+                await client.deleteTag(input.id);
+                return { success: true, message: `Tag ${input.id} deleted successfully` };
+            }
+            default:
+                return { success: false, error: `Unknown action: ${input.action}` };
+        }
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleVariables(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['list', 'create', 'update', 'delete']),
+            id: zod_1.z.string().optional(),
+            key: zod_1.z.string().optional(),
+            value: zod_1.z.string().optional(),
+            projectId: zod_1.z.string().optional(),
+            limit: zod_1.z.number().optional(),
+            cursor: zod_1.z.string().optional(),
+        }).parse(args);
+        switch (input.action) {
+            case 'list': {
+                const variables = await client.getVariables();
+                return {
+                    success: true,
+                    data: { data: variables },
+                    message: `Retrieved ${variables.length} variables`
+                };
+            }
+            case 'create': {
+                if (!input.key || !input.value) {
+                    return { success: false, error: 'Key and value are required for create action' };
+                }
+                const variable = await client.createVariable({
+                    key: input.key,
+                    value: input.value,
+                });
+                return {
+                    success: true,
+                    data: variable,
+                    message: `Variable "${input.key}" created successfully`
+                };
+            }
+            case 'update': {
+                if (!input.id || !input.key || !input.value) {
+                    return { success: false, error: 'ID, key and value are required for update action' };
+                }
+                const variable = await client.updateVariable(input.id, {
+                    key: input.key,
+                    value: input.value,
+                });
+                return {
+                    success: true,
+                    data: variable,
+                    message: `Variable ${input.id} updated successfully`
+                };
+            }
+            case 'delete': {
+                if (!input.id) {
+                    return { success: false, error: 'Variable ID is required for delete action' };
+                }
+                await client.deleteVariable(input.id);
+                return { success: true, message: `Variable ${input.id} deleted successfully` };
+            }
+            default:
+                return { success: false, error: `Unknown action: ${input.action}` };
+        }
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleUsers(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['list', 'get', 'create', 'delete', 'change_role']),
+            id: zod_1.z.string().optional(),
+            users: zod_1.z.array(zod_1.z.object({
+                email: zod_1.z.string(),
+                role: zod_1.z.string().optional(),
+            })).optional(),
+            newRoleName: zod_1.z.string().optional(),
+            includeRole: zod_1.z.boolean().optional(),
+            projectId: zod_1.z.string().optional(),
+            limit: zod_1.z.number().optional(),
+            cursor: zod_1.z.string().optional(),
+        }).parse(args);
+        switch (input.action) {
+            case 'list': {
+                const result = await client.listUsers({
+                    limit: input.limit,
+                    cursor: input.cursor,
+                    includeRole: input.includeRole,
+                    projectId: input.projectId,
+                });
+                return {
+                    success: true,
+                    data: result,
+                    message: `Retrieved ${result.data.length} users`
+                };
+            }
+            case 'get': {
+                if (!input.id) {
+                    return { success: false, error: 'User ID or email is required for get action' };
+                }
+                const user = await client.getUser(input.id, input.includeRole);
+                return { success: true, data: user };
+            }
+            case 'create': {
+                if (!input.users || input.users.length === 0) {
+                    return { success: false, error: 'Users array is required for create action' };
+                }
+                const users = await client.createUser(input.users);
+                return {
+                    success: true,
+                    data: users,
+                    message: `Invited ${users.length} user(s) successfully`
+                };
+            }
+            case 'delete': {
+                if (!input.id) {
+                    return { success: false, error: 'User ID or email is required for delete action' };
+                }
+                await client.deleteUser(input.id);
+                return { success: true, message: `User ${input.id} deleted successfully` };
+            }
+            case 'change_role': {
+                if (!input.id || !input.newRoleName) {
+                    return { success: false, error: 'User ID and new role name are required for change_role action' };
+                }
+                await client.changeUserRole(input.id, input.newRoleName);
+                return { success: true, message: `User ${input.id} role changed to ${input.newRoleName}` };
+            }
+            default:
+                return { success: false, error: `Unknown action: ${input.action}` };
+        }
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleProjects(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['list', 'create', 'update', 'delete', 'add_users', 'remove_user', 'change_user_role']),
+            id: zod_1.z.string().optional(),
+            name: zod_1.z.string().optional(),
+            userId: zod_1.z.string().optional(),
+            users: zod_1.z.array(zod_1.z.object({
+                userId: zod_1.z.string(),
+                role: zod_1.z.string(),
+            })).optional(),
+            role: zod_1.z.string().optional(),
+            limit: zod_1.z.number().optional(),
+            cursor: zod_1.z.string().optional(),
+        }).parse(args);
+        switch (input.action) {
+            case 'list': {
+                const result = await client.listProjects({
+                    limit: input.limit,
+                    cursor: input.cursor,
+                });
+                return {
+                    success: true,
+                    data: result,
+                    message: `Retrieved ${result.data.length} projects`
+                };
+            }
+            case 'create': {
+                if (!input.name) {
+                    return { success: false, error: 'Name is required for create action' };
+                }
+                const project = await client.createProject(input.name);
+                return {
+                    success: true,
+                    data: project,
+                    message: `Project "${input.name}" created successfully`
+                };
+            }
+            case 'update': {
+                if (!input.id || !input.name) {
+                    return { success: false, error: 'Project ID and name are required for update action' };
+                }
+                await client.updateProject(input.id, input.name);
+                return { success: true, message: `Project ${input.id} updated successfully` };
+            }
+            case 'delete': {
+                if (!input.id) {
+                    return { success: false, error: 'Project ID is required for delete action' };
+                }
+                await client.deleteProject(input.id);
+                return { success: true, message: `Project ${input.id} deleted successfully` };
+            }
+            case 'add_users': {
+                if (!input.id || !input.users || input.users.length === 0) {
+                    return { success: false, error: 'Project ID and users array are required for add_users action' };
+                }
+                await client.addProjectUsers(input.id, input.users);
+                return { success: true, message: `Added ${input.users.length} user(s) to project ${input.id}` };
+            }
+            case 'remove_user': {
+                if (!input.id || !input.userId) {
+                    return { success: false, error: 'Project ID and user ID are required for remove_user action' };
+                }
+                await client.removeProjectUser(input.id, input.userId);
+                return { success: true, message: `User ${input.userId} removed from project ${input.id}` };
+            }
+            case 'change_user_role': {
+                if (!input.id || !input.userId || !input.role) {
+                    return { success: false, error: 'Project ID, user ID and role are required for change_user_role action' };
+                }
+                await client.changeProjectUserRole(input.id, input.userId, input.role);
+                return { success: true, message: `User ${input.userId} role changed to ${input.role} in project ${input.id}` };
+            }
+            default:
+                return { success: false, error: `Unknown action: ${input.action}` };
+        }
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleActivateWorkflow(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            id: zod_1.z.string(),
+        }).parse(args);
+        const workflow = await client.activateWorkflow(input.id);
+        return {
+            success: true,
+            data: {
+                id: workflow.id,
+                name: workflow.name,
+                active: workflow.active,
+            },
+            message: `Workflow "${workflow.name}" activated successfully`
+        };
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleDeactivateWorkflow(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            id: zod_1.z.string(),
+        }).parse(args);
+        const workflow = await client.deactivateWorkflow(input.id);
+        return {
+            success: true,
+            data: {
+                id: workflow.id,
+                name: workflow.name,
+                active: workflow.active,
+            },
+            message: `Workflow "${workflow.name}" deactivated successfully`
+        };
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleSourceControl(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            action: zod_1.z.enum(['pull']),
+            force: zod_1.z.boolean().optional(),
+            variables: zod_1.z.record(zod_1.z.unknown()).optional(),
+        }).parse(args);
+        if (input.action === 'pull') {
+            const result = await client.pullSourceControl(input.force);
+            return {
+                success: true,
+                data: result,
+                message: result.pullResult === 'success'
+                    ? 'Source control pull completed successfully'
+                    : `Source control pull completed with status: ${result.pullResult}`
+            };
+        }
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleAudit(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            daysAbandonedWorkflow: zod_1.z.number().optional(),
+            categories: zod_1.z.array(zod_1.z.enum(['credentials', 'database', 'nodes', 'filesystem', 'instance'])).optional(),
+        }).parse(args);
+        const report = await client.generateAudit({
+            daysAbandonedWorkflow: input.daysAbandonedWorkflow,
+            categories: input.categories,
+        });
+        return {
+            success: true,
+            data: report,
+            message: 'Audit report generated successfully'
+        };
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+async function handleRetryExecution(args, context) {
+    try {
+        const client = ensureApiConfigured(context);
+        const input = zod_1.z.object({
+            id: zod_1.z.string(),
+        }).parse(args);
+        const execution = await client.retryExecution(input.id);
+        return {
+            success: true,
+            data: {
+                id: execution.id,
+                status: execution.status,
+                workflowId: execution.workflowId,
+            },
+            message: `Execution ${input.id} retry initiated successfully`
+        };
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+        }
+        if (error instanceof n8n_errors_1.N8nApiError) {
+            return { success: false, error: (0, n8n_errors_1.getUserFriendlyErrorMessage)(error), code: error.code };
+        }
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }
 //# sourceMappingURL=handlers-n8n-manager.js.map

@@ -26,4 +26,14 @@ export declare function handleDiagnostic(request: any, context?: InstanceContext
 export declare function handleWorkflowVersions(args: unknown, repository: NodeRepository, context?: InstanceContext): Promise<McpToolResponse>;
 export declare function handleDeployTemplate(args: unknown, templateService: TemplateService, repository: NodeRepository, context?: InstanceContext): Promise<McpToolResponse>;
 export declare function handleTriggerWebhookWorkflow(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleCredentials(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleTags(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleVariables(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleUsers(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleProjects(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleActivateWorkflow(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleDeactivateWorkflow(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleSourceControl(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleAudit(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
+export declare function handleRetryExecution(args: unknown, context?: InstanceContext): Promise<McpToolResponse>;
 //# sourceMappingURL=handlers-n8n-manager.d.ts.map

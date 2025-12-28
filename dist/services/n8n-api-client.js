@@ -431,6 +431,153 @@ class N8nApiClient {
             throw (0, n8n_errors_1.handleN8nApiError)(error);
         }
     }
+    async listUsers(params = {}) {
+        try {
+            const response = await this.client.get('/users', { params });
+            return this.validateListResponse(response.data, 'users');
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async createUser(users) {
+        try {
+            const response = await this.client.post('/users', users);
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async getUser(idOrEmail, includeRole = false) {
+        try {
+            const response = await this.client.get(`/users/${idOrEmail}`, {
+                params: { includeRole },
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async deleteUser(idOrEmail) {
+        try {
+            await this.client.delete(`/users/${idOrEmail}`);
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async changeUserRole(id, newRoleName) {
+        try {
+            await this.client.patch(`/users/${id}/role`, { newRoleName });
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async listProjects(params = {}) {
+        try {
+            const response = await this.client.get('/projects', { params });
+            return this.validateListResponse(response.data, 'projects');
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async createProject(name) {
+        try {
+            const response = await this.client.post('/projects', { name });
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async updateProject(id, name) {
+        try {
+            await this.client.put(`/projects/${id}`, { name });
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async deleteProject(id) {
+        try {
+            await this.client.delete(`/projects/${id}`);
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async addProjectUsers(projectId, relations) {
+        try {
+            await this.client.post(`/projects/${projectId}/users`, { relations });
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async removeProjectUser(projectId, userId) {
+        try {
+            await this.client.delete(`/projects/${projectId}/users/${userId}`);
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async changeProjectUserRole(projectId, userId, role) {
+        try {
+            await this.client.patch(`/projects/${projectId}/users/${userId}`, { role });
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async getCredentialSchema(credentialTypeName) {
+        try {
+            const response = await this.client.get(`/credentials/schema/${credentialTypeName}`);
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async transferCredential(id, destinationProjectId) {
+        try {
+            await this.client.put(`/credentials/${id}/transfer`, { destinationProjectId });
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async generateAudit(options) {
+        try {
+            const response = await this.client.post('/audit', { additionalOptions: options });
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async retryExecution(id) {
+        try {
+            const response = await this.client.post(`/executions/${id}/retry`);
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
+    async getTag(id) {
+        try {
+            const response = await this.client.get(`/tags/${id}`);
+            return response.data;
+        }
+        catch (error) {
+            throw (0, n8n_errors_1.handleN8nApiError)(error);
+        }
+    }
     validateListResponse(responseData, resourceType) {
         if (!responseData || typeof responseData !== 'object') {
             throw new Error(`Invalid response from n8n API for ${resourceType}: response is not an object`);
