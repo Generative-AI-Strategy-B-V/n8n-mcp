@@ -10,6 +10,7 @@ import {
   Credential,
   CredentialListParams,
   CredentialListResponse,
+  CredentialSchema,
   Tag,
   TagListParams,
   TagListResponse,
@@ -22,6 +23,16 @@ import {
   SourceControlStatus,
   SourceControlPullResult,
   SourceControlPushResult,
+  User,
+  UserListParams,
+  UserListResponse,
+  CreateUserRequest,
+  Project,
+  ProjectListParams,
+  ProjectListResponse,
+  ProjectUserRelation,
+  AuditOptions,
+  AuditReport,
 } from '../types/n8n-api';
 import { handleN8nApiError, logN8nError } from '../utils/n8n-errors';
 import { cleanWorkflowForCreate, cleanWorkflowForUpdate } from './n8n-validation';
@@ -560,6 +571,159 @@ export class N8nApiClient {
   async deleteVariable(id: string): Promise<void> {
     try {
       await this.client.delete(`/variables/${id}`);
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // User Management (Instance owner only)
+  async listUsers(params: UserListParams = {}): Promise<UserListResponse> {
+    try {
+      const response = await this.client.get('/users', { params });
+      return this.validateListResponse<User>(response.data, 'users');
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async createUser(users: CreateUserRequest[]): Promise<User[]> {
+    try {
+      const response = await this.client.post('/users', users);
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async getUser(idOrEmail: string, includeRole = false): Promise<User> {
+    try {
+      const response = await this.client.get(`/users/${idOrEmail}`, {
+        params: { includeRole },
+      });
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async deleteUser(idOrEmail: string): Promise<void> {
+    try {
+      await this.client.delete(`/users/${idOrEmail}`);
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async changeUserRole(id: string, newRoleName: string): Promise<void> {
+    try {
+      await this.client.patch(`/users/${id}/role`, { newRoleName });
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // Project Management
+  async listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {
+    try {
+      const response = await this.client.get('/projects', { params });
+      return this.validateListResponse<Project>(response.data, 'projects');
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async createProject(name: string): Promise<Project> {
+    try {
+      const response = await this.client.post('/projects', { name });
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async updateProject(id: string, name: string): Promise<void> {
+    try {
+      await this.client.put(`/projects/${id}`, { name });
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    try {
+      await this.client.delete(`/projects/${id}`);
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async addProjectUsers(projectId: string, relations: ProjectUserRelation[]): Promise<void> {
+    try {
+      await this.client.post(`/projects/${projectId}/users`, { relations });
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async removeProjectUser(projectId: string, userId: string): Promise<void> {
+    try {
+      await this.client.delete(`/projects/${projectId}/users/${userId}`);
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async changeProjectUserRole(projectId: string, userId: string, role: string): Promise<void> {
+    try {
+      await this.client.patch(`/projects/${projectId}/users/${userId}`, { role });
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // Credential Schema
+  async getCredentialSchema(credentialTypeName: string): Promise<CredentialSchema> {
+    try {
+      const response = await this.client.get(`/credentials/schema/${credentialTypeName}`);
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  async transferCredential(id: string, destinationProjectId: string): Promise<void> {
+    try {
+      await this.client.put(`/credentials/${id}/transfer`, { destinationProjectId });
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // Audit
+  async generateAudit(options?: AuditOptions): Promise<AuditReport> {
+    try {
+      const response = await this.client.post('/audit', { additionalOptions: options });
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // Execution Retry
+  async retryExecution(id: string): Promise<Execution> {
+    try {
+      const response = await this.client.post(`/executions/${id}/retry`);
+      return response.data;
+    } catch (error) {
+      throw handleN8nApiError(error);
+    }
+  }
+
+  // Get Tag by ID
+  async getTag(id: string): Promise<Tag> {
+    try {
+      const response = await this.client.get(`/tags/${id}`);
+      return response.data;
     } catch (error) {
       throw handleN8nApiError(error);
     }

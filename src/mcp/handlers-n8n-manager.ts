@@ -2671,3 +2671,577 @@ export async function handleTriggerWebhookWorkflow(args: unknown, context?: Inst
     };
   }
 }
+
+// ========================================================================
+// Credential Management Handlers
+// ========================================================================
+
+export async function handleCredentials(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['list', 'get', 'create', 'delete', 'schema', 'transfer']),
+      id: z.string().optional(),
+      name: z.string().optional(),
+      type: z.string().optional(),
+      data: z.record(z.unknown()).optional(),
+      destinationProjectId: z.string().optional(),
+      limit: z.number().optional(),
+      cursor: z.string().optional(),
+    }).parse(args);
+
+    switch (input.action) {
+      case 'list': {
+        const result = await client.listCredentials({
+          limit: input.limit,
+          cursor: input.cursor,
+        });
+        return {
+          success: true,
+          data: result,
+          message: `Retrieved ${result.data.length} credentials`
+        };
+      }
+      case 'get': {
+        if (!input.id) {
+          return { success: false, error: 'Credential ID is required for get action' };
+        }
+        const credential = await client.getCredential(input.id);
+        return { success: true, data: credential };
+      }
+      case 'create': {
+        if (!input.name || !input.type) {
+          return { success: false, error: 'Name and type are required for create action' };
+        }
+        const credential = await client.createCredential({
+          name: input.name,
+          type: input.type,
+          data: input.data,
+        });
+        return {
+          success: true,
+          data: credential,
+          message: `Credential "${input.name}" created successfully`
+        };
+      }
+      case 'delete': {
+        if (!input.id) {
+          return { success: false, error: 'Credential ID is required for delete action' };
+        }
+        await client.deleteCredential(input.id);
+        return { success: true, message: `Credential ${input.id} deleted successfully` };
+      }
+      case 'schema': {
+        if (!input.type) {
+          return { success: false, error: 'Credential type is required for schema action' };
+        }
+        const schema = await client.getCredentialSchema(input.type);
+        return { success: true, data: schema };
+      }
+      case 'transfer': {
+        if (!input.id || !input.destinationProjectId) {
+          return { success: false, error: 'Credential ID and destination project ID are required for transfer action' };
+        }
+        await client.transferCredential(input.id, input.destinationProjectId);
+        return { success: true, message: `Credential ${input.id} transferred successfully` };
+      }
+      default:
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Tag Management Handlers
+// ========================================================================
+
+export async function handleTags(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['list', 'get', 'create', 'update', 'delete']),
+      id: z.string().optional(),
+      name: z.string().optional(),
+      limit: z.number().optional(),
+      cursor: z.string().optional(),
+    }).parse(args);
+
+    switch (input.action) {
+      case 'list': {
+        const result = await client.listTags({
+          limit: input.limit,
+          cursor: input.cursor,
+        });
+        return {
+          success: true,
+          data: result,
+          message: `Retrieved ${result.data.length} tags`
+        };
+      }
+      case 'get': {
+        if (!input.id) {
+          return { success: false, error: 'Tag ID is required for get action' };
+        }
+        const tag = await client.getTag(input.id);
+        return { success: true, data: tag };
+      }
+      case 'create': {
+        if (!input.name) {
+          return { success: false, error: 'Name is required for create action' };
+        }
+        const tag = await client.createTag({ name: input.name });
+        return {
+          success: true,
+          data: tag,
+          message: `Tag "${input.name}" created successfully`
+        };
+      }
+      case 'update': {
+        if (!input.id || !input.name) {
+          return { success: false, error: 'Tag ID and name are required for update action' };
+        }
+        const tag = await client.updateTag(input.id, { name: input.name });
+        return {
+          success: true,
+          data: tag,
+          message: `Tag ${input.id} updated successfully`
+        };
+      }
+      case 'delete': {
+        if (!input.id) {
+          return { success: false, error: 'Tag ID is required for delete action' };
+        }
+        await client.deleteTag(input.id);
+        return { success: true, message: `Tag ${input.id} deleted successfully` };
+      }
+      default:
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Variable Management Handlers
+// ========================================================================
+
+export async function handleVariables(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['list', 'create', 'update', 'delete']),
+      id: z.string().optional(),
+      key: z.string().optional(),
+      value: z.string().optional(),
+      projectId: z.string().optional(),
+      limit: z.number().optional(),
+      cursor: z.string().optional(),
+    }).parse(args);
+
+    switch (input.action) {
+      case 'list': {
+        const variables = await client.getVariables();
+        return {
+          success: true,
+          data: { data: variables },
+          message: `Retrieved ${variables.length} variables`
+        };
+      }
+      case 'create': {
+        if (!input.key || !input.value) {
+          return { success: false, error: 'Key and value are required for create action' };
+        }
+        const variable = await client.createVariable({
+          key: input.key,
+          value: input.value,
+        });
+        return {
+          success: true,
+          data: variable,
+          message: `Variable "${input.key}" created successfully`
+        };
+      }
+      case 'update': {
+        if (!input.id || !input.key || !input.value) {
+          return { success: false, error: 'ID, key and value are required for update action' };
+        }
+        const variable = await client.updateVariable(input.id, {
+          key: input.key,
+          value: input.value,
+        });
+        return {
+          success: true,
+          data: variable,
+          message: `Variable ${input.id} updated successfully`
+        };
+      }
+      case 'delete': {
+        if (!input.id) {
+          return { success: false, error: 'Variable ID is required for delete action' };
+        }
+        await client.deleteVariable(input.id);
+        return { success: true, message: `Variable ${input.id} deleted successfully` };
+      }
+      default:
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// User Management Handlers (Instance owner only)
+// ========================================================================
+
+export async function handleUsers(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['list', 'get', 'create', 'delete', 'change_role']),
+      id: z.string().optional(),
+      users: z.array(z.object({
+        email: z.string(),
+        role: z.string().optional(),
+      })).optional(),
+      newRoleName: z.string().optional(),
+      includeRole: z.boolean().optional(),
+      projectId: z.string().optional(),
+      limit: z.number().optional(),
+      cursor: z.string().optional(),
+    }).parse(args);
+
+    switch (input.action) {
+      case 'list': {
+        const result = await client.listUsers({
+          limit: input.limit,
+          cursor: input.cursor,
+          includeRole: input.includeRole,
+          projectId: input.projectId,
+        });
+        return {
+          success: true,
+          data: result,
+          message: `Retrieved ${result.data.length} users`
+        };
+      }
+      case 'get': {
+        if (!input.id) {
+          return { success: false, error: 'User ID or email is required for get action' };
+        }
+        const user = await client.getUser(input.id, input.includeRole);
+        return { success: true, data: user };
+      }
+      case 'create': {
+        if (!input.users || input.users.length === 0) {
+          return { success: false, error: 'Users array is required for create action' };
+        }
+        const users = await client.createUser(input.users);
+        return {
+          success: true,
+          data: users,
+          message: `Invited ${users.length} user(s) successfully`
+        };
+      }
+      case 'delete': {
+        if (!input.id) {
+          return { success: false, error: 'User ID or email is required for delete action' };
+        }
+        await client.deleteUser(input.id);
+        return { success: true, message: `User ${input.id} deleted successfully` };
+      }
+      case 'change_role': {
+        if (!input.id || !input.newRoleName) {
+          return { success: false, error: 'User ID and new role name are required for change_role action' };
+        }
+        await client.changeUserRole(input.id, input.newRoleName);
+        return { success: true, message: `User ${input.id} role changed to ${input.newRoleName}` };
+      }
+      default:
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Project Management Handlers
+// ========================================================================
+
+export async function handleProjects(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['list', 'create', 'update', 'delete', 'add_users', 'remove_user', 'change_user_role']),
+      id: z.string().optional(),
+      name: z.string().optional(),
+      userId: z.string().optional(),
+      users: z.array(z.object({
+        userId: z.string(),
+        role: z.string(),
+      })).optional(),
+      role: z.string().optional(),
+      limit: z.number().optional(),
+      cursor: z.string().optional(),
+    }).parse(args);
+
+    switch (input.action) {
+      case 'list': {
+        const result = await client.listProjects({
+          limit: input.limit,
+          cursor: input.cursor,
+        });
+        return {
+          success: true,
+          data: result,
+          message: `Retrieved ${result.data.length} projects`
+        };
+      }
+      case 'create': {
+        if (!input.name) {
+          return { success: false, error: 'Name is required for create action' };
+        }
+        const project = await client.createProject(input.name);
+        return {
+          success: true,
+          data: project,
+          message: `Project "${input.name}" created successfully`
+        };
+      }
+      case 'update': {
+        if (!input.id || !input.name) {
+          return { success: false, error: 'Project ID and name are required for update action' };
+        }
+        await client.updateProject(input.id, input.name);
+        return { success: true, message: `Project ${input.id} updated successfully` };
+      }
+      case 'delete': {
+        if (!input.id) {
+          return { success: false, error: 'Project ID is required for delete action' };
+        }
+        await client.deleteProject(input.id);
+        return { success: true, message: `Project ${input.id} deleted successfully` };
+      }
+      case 'add_users': {
+        if (!input.id || !input.users || input.users.length === 0) {
+          return { success: false, error: 'Project ID and users array are required for add_users action' };
+        }
+        await client.addProjectUsers(input.id, input.users);
+        return { success: true, message: `Added ${input.users.length} user(s) to project ${input.id}` };
+      }
+      case 'remove_user': {
+        if (!input.id || !input.userId) {
+          return { success: false, error: 'Project ID and user ID are required for remove_user action' };
+        }
+        await client.removeProjectUser(input.id, input.userId);
+        return { success: true, message: `User ${input.userId} removed from project ${input.id}` };
+      }
+      case 'change_user_role': {
+        if (!input.id || !input.userId || !input.role) {
+          return { success: false, error: 'Project ID, user ID and role are required for change_user_role action' };
+        }
+        await client.changeProjectUserRole(input.id, input.userId, input.role);
+        return { success: true, message: `User ${input.userId} role changed to ${input.role} in project ${input.id}` };
+      }
+      default:
+        return { success: false, error: `Unknown action: ${input.action}` };
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Workflow Activation Handlers
+// ========================================================================
+
+export async function handleActivateWorkflow(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      id: z.string(),
+    }).parse(args);
+
+    const workflow = await client.activateWorkflow(input.id);
+    return {
+      success: true,
+      data: {
+        id: workflow.id,
+        name: workflow.name,
+        active: workflow.active,
+      },
+      message: `Workflow "${workflow.name}" activated successfully`
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+export async function handleDeactivateWorkflow(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      id: z.string(),
+    }).parse(args);
+
+    const workflow = await client.deactivateWorkflow(input.id);
+    return {
+      success: true,
+      data: {
+        id: workflow.id,
+        name: workflow.name,
+        active: workflow.active,
+      },
+      message: `Workflow "${workflow.name}" deactivated successfully`
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Source Control Handler
+// ========================================================================
+
+export async function handleSourceControl(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      action: z.enum(['pull']),
+      force: z.boolean().optional(),
+      variables: z.record(z.unknown()).optional(),
+    }).parse(args);
+
+    if (input.action === 'pull') {
+      const result = await client.pullSourceControl(input.force);
+      return {
+        success: true,
+        data: result,
+        message: result.pullResult === 'success'
+          ? 'Source control pull completed successfully'
+          : `Source control pull completed with status: ${result.pullResult}`
+      };
+    }
+
+    return { success: false, error: `Unknown action: ${input.action}` };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Audit Handler
+// ========================================================================
+
+export async function handleAudit(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      daysAbandonedWorkflow: z.number().optional(),
+      categories: z.array(z.enum(['credentials', 'database', 'nodes', 'filesystem', 'instance'])).optional(),
+    }).parse(args);
+
+    const report = await client.generateAudit({
+      daysAbandonedWorkflow: input.daysAbandonedWorkflow,
+      categories: input.categories,
+    });
+
+    return {
+      success: true,
+      data: report,
+      message: 'Audit report generated successfully'
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// ========================================================================
+// Execution Retry Handler
+// ========================================================================
+
+export async function handleRetryExecution(args: unknown, context?: InstanceContext): Promise<McpToolResponse> {
+  try {
+    const client = ensureApiConfigured(context);
+    const input = z.object({
+      id: z.string(),
+    }).parse(args);
+
+    const execution = await client.retryExecution(input.id);
+    return {
+      success: true,
+      data: {
+        id: execution.id,
+        status: execution.status,
+        workflowId: execution.workflowId,
+      },
+      message: `Execution ${input.id} retry initiated successfully`
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: 'Invalid input', details: { errors: error.errors } };
+    }
+    if (error instanceof N8nApiError) {
+      return { success: false, error: getUserFriendlyErrorMessage(error), code: error.code };
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}

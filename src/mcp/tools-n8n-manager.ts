@@ -602,5 +602,328 @@ export const n8nManagementTools: ToolDefinition[] = [
       destructiveHint: false,
       openWorldHint: true,
     },
+  },
+
+  // ========================================================================
+  // Credential Management Tools
+  // ========================================================================
+
+  // Credential Management Tools
+  {
+    name: 'n8n_credentials',
+    description: `Manage credentials: list, get, create, delete, get schema, or transfer. Use action parameter to select operation.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['list', 'get', 'create', 'delete', 'schema', 'transfer'],
+          description: 'Operation: list=list all, get=get by ID, create=create new, delete=delete, schema=get type schema, transfer=transfer to project'
+        },
+        id: {
+          type: 'string',
+          description: 'Credential ID (required for get, delete, transfer)'
+        },
+        name: {
+          type: 'string',
+          description: 'For create: credential name (required)'
+        },
+        type: {
+          type: 'string',
+          description: 'For create/schema: credential type name (e.g., "slackApi", "googleOAuth2Api")'
+        },
+        data: {
+          type: 'object',
+          description: 'For create: credential data (secrets, tokens, etc.)'
+        },
+        destinationProjectId: {
+          type: 'string',
+          description: 'For transfer: destination project ID'
+        },
+        limit: {
+          type: 'number',
+          description: 'For list: max results (default 100)'
+        },
+        cursor: {
+          type: 'string',
+          description: 'For list: pagination cursor'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // Tag Management Tools
+  {
+    name: 'n8n_tags',
+    description: `Manage workflow tags: list, get, create, update, or delete. Use action parameter to select operation.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['list', 'get', 'create', 'update', 'delete'],
+          description: 'Operation: list=list all, get=get by ID, create=create new, update=rename, delete=remove'
+        },
+        id: {
+          type: 'string',
+          description: 'Tag ID (required for get, update, delete)'
+        },
+        name: {
+          type: 'string',
+          description: 'Tag name (required for create, update)'
+        },
+        limit: {
+          type: 'number',
+          description: 'For list: max results (default 100, max 250)'
+        },
+        cursor: {
+          type: 'string',
+          description: 'For list: pagination cursor'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // Variable Management Tools
+  {
+    name: 'n8n_variables',
+    description: `Manage environment variables: list, create, update, or delete. Variables are key-value pairs accessible in workflows.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['list', 'create', 'update', 'delete'],
+          description: 'Operation: list=list all, create=create new, update=modify, delete=remove'
+        },
+        id: {
+          type: 'string',
+          description: 'Variable ID (required for update, delete)'
+        },
+        key: {
+          type: 'string',
+          description: 'Variable key/name (required for create, update)'
+        },
+        value: {
+          type: 'string',
+          description: 'Variable value (required for create, update)'
+        },
+        projectId: {
+          type: 'string',
+          description: 'For create/list: project ID (optional)'
+        },
+        limit: {
+          type: 'number',
+          description: 'For list: max results'
+        },
+        cursor: {
+          type: 'string',
+          description: 'For list: pagination cursor'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // User Management Tools (Instance owner only)
+  {
+    name: 'n8n_users',
+    description: `Manage users (instance owner only): list, get, create/invite, delete, or change role.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['list', 'get', 'create', 'delete', 'change_role'],
+          description: 'Operation: list=list all, get=get by ID/email, create=invite user(s), delete=remove, change_role=update global role'
+        },
+        id: {
+          type: 'string',
+          description: 'User ID or email (required for get, delete, change_role)'
+        },
+        users: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              email: { type: 'string' },
+              role: { type: 'string' }
+            },
+            required: ['email']
+          },
+          description: 'For create: array of users to invite with email and optional role'
+        },
+        newRoleName: {
+          type: 'string',
+          description: 'For change_role: new global role name (e.g., "global:member")'
+        },
+        includeRole: {
+          type: 'boolean',
+          description: 'For list/get: include role information'
+        },
+        projectId: {
+          type: 'string',
+          description: 'For list: filter by project'
+        },
+        limit: {
+          type: 'number',
+          description: 'For list: max results'
+        },
+        cursor: {
+          type: 'string',
+          description: 'For list: pagination cursor'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // Project Management Tools
+  {
+    name: 'n8n_projects',
+    description: `Manage projects: list, create, update, delete, or manage project users.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['list', 'create', 'update', 'delete', 'add_users', 'remove_user', 'change_user_role'],
+          description: 'Operation: list, create, update, delete for projects; add_users, remove_user, change_user_role for project membership'
+        },
+        id: {
+          type: 'string',
+          description: 'Project ID (required for update, delete, user operations)'
+        },
+        name: {
+          type: 'string',
+          description: 'Project name (required for create, update)'
+        },
+        userId: {
+          type: 'string',
+          description: 'User ID (required for remove_user, change_user_role)'
+        },
+        users: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              userId: { type: 'string' },
+              role: { type: 'string' }
+            },
+            required: ['userId', 'role']
+          },
+          description: 'For add_users: array of {userId, role} objects. Roles: "project:viewer", "project:editor", "project:admin"'
+        },
+        role: {
+          type: 'string',
+          description: 'For change_user_role: new project role'
+        },
+        limit: {
+          type: 'number',
+          description: 'For list: max results'
+        },
+        cursor: {
+          type: 'string',
+          description: 'For list: pagination cursor'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // Workflow Activation Tools
+  {
+    name: 'n8n_activate_workflow',
+    description: `Activate a workflow to start processing triggers. Returns the updated workflow.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'Workflow ID to activate'
+        }
+      },
+      required: ['id']
+    }
+  },
+  {
+    name: 'n8n_deactivate_workflow',
+    description: `Deactivate a workflow to stop processing triggers. Returns the updated workflow.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'Workflow ID to deactivate'
+        }
+      },
+      required: ['id']
+    }
+  },
+
+  // Source Control Tool
+  {
+    name: 'n8n_source_control',
+    description: `Pull changes from connected Git repository (Enterprise feature). Requires source control to be configured.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['pull'],
+          description: 'Operation: pull=pull changes from repository'
+        },
+        force: {
+          type: 'boolean',
+          description: 'Force pull even if there are conflicts (default: false)'
+        },
+        variables: {
+          type: 'object',
+          description: 'Variables to use during pull'
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  // Audit Tool
+  {
+    name: 'n8n_audit',
+    description: `Generate a security/compliance audit report for the n8n instance.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        daysAbandonedWorkflow: {
+          type: 'number',
+          description: 'Days after which inactive workflows are considered abandoned'
+        },
+        categories: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['credentials', 'database', 'nodes', 'filesystem', 'instance']
+          },
+          description: 'Categories to include in audit (default: all)'
+        }
+      }
+    }
+  },
+
+  // Execution Retry Tool
+  {
+    name: 'n8n_retry_execution',
+    description: `Retry a failed workflow execution. Returns the new execution.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'Execution ID to retry'
+        }
+      },
+      required: ['id']
+    }
   }
 ];

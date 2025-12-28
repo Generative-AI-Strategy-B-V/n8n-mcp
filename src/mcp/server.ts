@@ -1276,6 +1276,53 @@ export class N8NDocumentationMCPServer {
         if (!this.repository) throw new Error('Repository not initialized');
         return n8nHandlers.handleDeployTemplate(args, this.templateService, this.repository, this.instanceContext);
 
+      // Credential Management
+      case 'n8n_credentials':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleCredentials(args, this.instanceContext);
+
+      // Tag Management
+      case 'n8n_tags':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleTags(args, this.instanceContext);
+
+      // Variable Management
+      case 'n8n_variables':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleVariables(args, this.instanceContext);
+
+      // User Management
+      case 'n8n_users':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleUsers(args, this.instanceContext);
+
+      // Project Management
+      case 'n8n_projects':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleProjects(args, this.instanceContext);
+
+      // Workflow Activation
+      case 'n8n_activate_workflow':
+        this.validateToolParams(name, args, ['id']);
+        return n8nHandlers.handleActivateWorkflow(args, this.instanceContext);
+      case 'n8n_deactivate_workflow':
+        this.validateToolParams(name, args, ['id']);
+        return n8nHandlers.handleDeactivateWorkflow(args, this.instanceContext);
+
+      // Source Control
+      case 'n8n_source_control':
+        this.validateToolParams(name, args, ['action']);
+        return n8nHandlers.handleSourceControl(args, this.instanceContext);
+
+      // Audit
+      case 'n8n_audit':
+        return n8nHandlers.handleAudit(args, this.instanceContext);
+
+      // Execution Retry
+      case 'n8n_retry_execution':
+        this.validateToolParams(name, args, ['id']);
+        return n8nHandlers.handleRetryExecution(args, this.instanceContext);
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
