@@ -43,8 +43,8 @@ export const n8nManagementTools: ToolDefinition[] = [
               retryOnFail: { type: 'boolean' },
               maxTries: { type: 'number' },
               waitBetweenTries: { type: 'number' }
-            }
-          }
+            },
+          },
         },
         connections: {
           type: 'object',
@@ -62,8 +62,8 @@ export const n8nManagementTools: ToolDefinition[] = [
             saveExecutionProgress: { type: 'boolean' },
             executionTimeout: { type: 'number' },
             errorWorkflow: { type: 'string' }
-          }
-        }
+          },
+        },
       },
       required: ['name', 'nodes', 'connections']
     },
@@ -89,7 +89,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           enum: ['full', 'details', 'structure', 'minimal'],
           default: 'full',
           description: 'Detail level: full=complete workflow, details=full+execution stats, structure=nodes/connections topology, minimal=metadata only'
-        }
+        },
       },
       required: ['id']
     },
@@ -120,7 +120,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           items: {
             type: 'object',
             additionalProperties: true
-          }
+          },
         },
         connections: { 
           type: 'object', 
@@ -129,7 +129,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         settings: { 
           type: 'object', 
           description: 'Workflow settings to update' 
-        }
+        },
       },
       required: ['id']
     },
@@ -158,7 +158,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           items: {
             type: 'object',
             additionalProperties: true
-          }
+          },
         },
         validateOnly: {
           type: 'boolean',
@@ -167,7 +167,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         continueOnError: {
           type: 'boolean',
           description: 'If true, apply valid operations even if some fail (best-effort mode). Returns applied and failed operation indices. Default: false (atomic)'
-        }
+        },
       },
       required: ['id', 'operations']
     },
@@ -188,7 +188,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         id: { 
           type: 'string', 
           description: 'Workflow ID to delete' 
-        }
+        },
       },
       required: ['id']
     },
@@ -229,8 +229,8 @@ export const n8nManagementTools: ToolDefinition[] = [
         excludePinnedData: {
           type: 'boolean',
           description: 'Exclude pinned data from response (default: true)'
-        }
-      }
+        },
+      },
     },
     annotations: {
       title: 'List Workflows',
@@ -269,9 +269,9 @@ export const n8nManagementTools: ToolDefinition[] = [
               type: 'string',
               enum: ['minimal', 'runtime', 'ai-friendly', 'strict'],
               description: 'Validation profile to use (default: runtime)'
-            }
-          }
-        }
+            },
+          },
+        },
       },
       required: ['id']
     },
@@ -302,7 +302,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           items: {
             type: 'string',
             enum: ['expression-format', 'typeversion-correction', 'error-output-config', 'node-type-correction', 'webhook-missing-path', 'typeversion-upgrade', 'version-migration']
-          }
+          },
         },
         confidenceThreshold: {
           type: 'string',
@@ -312,7 +312,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         maxFixes: {
           type: 'number',
           description: 'Maximum number of fixes to apply (default: 50)'
-        }
+        },
       },
       required: ['id']
     },
@@ -376,7 +376,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         waitForResponse: {
           type: 'boolean',
           description: 'Wait for workflow completion (default: true)'
-        }
+        },
       },
       required: ['workflowId']
     },
@@ -464,7 +464,7 @@ export const n8nManagementTools: ToolDefinition[] = [
         includeData: {
           type: 'boolean',
           description: 'For action=list: include execution data (default: false)'
-        }
+        },
       },
       required: ['action']
     },
@@ -492,8 +492,8 @@ export const n8nManagementTools: ToolDefinition[] = [
         verbose: {
           type: 'boolean',
           description: 'Include extra details in diagnostic mode (default: false)'
-        }
-      }
+        },
+      },
     },
     annotations: {
       title: 'Health Check',
@@ -551,7 +551,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           type: 'boolean',
           default: false,
           description: 'REQUIRED: Must be true to truncate all versions (truncate mode only)'
-        }
+        },
       },
       required: ['mode']
     },
@@ -592,7 +592,7 @@ export const n8nManagementTools: ToolDefinition[] = [
           type: 'boolean',
           default: true,
           description: 'Remove credential references from nodes - user configures in n8n UI (default: true)'
-        }
+        },
       },
       required: ['templateId']
     },
@@ -647,10 +647,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         cursor: {
           type: 'string',
           description: 'For list: pagination cursor'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Manage Credentials',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // Tag Management Tools
@@ -680,10 +687,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         cursor: {
           type: 'string',
           description: 'For list: pagination cursor'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Manage Tags',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // Variable Management Tools
@@ -721,10 +735,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         cursor: {
           type: 'string',
           description: 'For list: pagination cursor'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Manage Variables',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // User Management Tools (Instance owner only)
@@ -774,10 +795,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         cursor: {
           type: 'string',
           description: 'For list: pagination cursor'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Manage Users',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // Project Management Tools
@@ -827,10 +855,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         cursor: {
           type: 'string',
           description: 'For list: pagination cursor'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Manage Projects',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // Workflow Activation Tools
@@ -843,10 +878,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         id: {
           type: 'string',
           description: 'Workflow ID to activate'
-        }
+        },
       },
       required: ['id']
-    }
+    },
+    annotations: {
+      title: 'Activate Workflow',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
   },
   {
     name: 'n8n_deactivate_workflow',
@@ -857,10 +899,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         id: {
           type: 'string',
           description: 'Workflow ID to deactivate'
-        }
+        },
       },
       required: ['id']
-    }
+    },
+    annotations: {
+      title: 'Deactivate Workflow',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
   },
 
   // Source Control Tool
@@ -882,10 +931,17 @@ export const n8nManagementTools: ToolDefinition[] = [
         variables: {
           type: 'object',
           description: 'Variables to use during pull'
-        }
+        },
       },
       required: ['action']
-    }
+    },
+    annotations: {
+      title: 'Source Control',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
 
   // Audit Tool
@@ -906,9 +962,16 @@ export const n8nManagementTools: ToolDefinition[] = [
             enum: ['credentials', 'database', 'nodes', 'filesystem', 'instance']
           },
           description: 'Categories to include in audit (default: all)'
-        }
-      }
-    }
+        },
+      },
+    },
+    annotations: {
+      title: 'Security Audit',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
   },
 
   // Execution Retry Tool
@@ -921,9 +984,16 @@ export const n8nManagementTools: ToolDefinition[] = [
         id: {
           type: 'string',
           description: 'Execution ID to retry'
-        }
+        },
       },
       required: ['id']
-    }
+    },
+    annotations: {
+      title: 'Retry Execution',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   }
 ];
